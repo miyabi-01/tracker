@@ -450,8 +450,6 @@ th {
   white-space: nowrap;
 }
 th:hover { color: var(--text-s); }
-th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.4; }
-th.sorted .sort-arrow { opacity: 1; }
 td {
   padding: 14px 16px;
   font-size: 14px;
@@ -551,12 +549,6 @@ tr:hover td { background: var(--bg-s); }
   color: var(--text-t);
   margin-top: 2px;
 }
-.lock-icon {
-  font-size: 14px;
-  margin-right: 4px;
-  vertical-align: middle;
-}
-
 /* Animations */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .animate-in { animation: fadeIn 0.3s ease; }
@@ -975,9 +967,7 @@ const App = {
     // Filter pills
     const filters = ['all','locked','unlocked','forfeited'];
     document.getElementById('reserveFilters').innerHTML = filters.map(f => {
-      const icons = { locked: '&#128274;', unlocked: '&#128275;', forfeited: '&#128683;' };
-      const icon = icons[f] ? `<span style="font-size:12px;margin-right:4px">${icons[f]}</span>` : '';
-      return `<button class="filter-pill ${this.reserveFilter === f ? 'active' : ''}" data-action="reserveFilter" data-val="${f}">${icon}${f.charAt(0).toUpperCase() + f.slice(1)}</button>`;
+      return `<button class="filter-pill ${this.reserveFilter === f ? 'active' : ''}" data-action="reserveFilter" data-val="${f}">${f.charAt(0).toUpperCase() + f.slice(1)}</button>`;
     }).join('');
 
     // Summary
@@ -998,7 +988,7 @@ const App = {
     items.sort((a, b) => this.daysRemaining(a) - this.daysRemaining(b));
 
     if (items.length === 0) {
-      document.getElementById('reserveList').innerHTML = `<div class="empty-state"><div class="icon">&#9681;</div><p>No reserve fund entries${this.reserveFilter !== 'all' ? ' for this filter' : ''}</p></div>`;
+      document.getElementById('reserveList').innerHTML = `<div class="empty-state"><p>No reserve fund entries${this.reserveFilter !== 'all' ? ' for this filter' : ''}</p></div>`;
       return;
     }
 
@@ -1010,27 +1000,24 @@ const App = {
       const status = this.reserveStatus(d);
       const progress = Math.min(100, (elapsed / this.RESERVE_DAYS) * 100);
 
-      let barColor, statusLabel, statusClass, statusIcon;
+      let barColor, statusLabel, statusClass;
       if (status === 'forfeited') {
         barColor = 'var(--red)';
         statusLabel = 'Forfeited';
         statusClass = 'forfeited';
-        statusIcon = '&#128683;';
       } else if (status === 'unlocked') {
         barColor = 'var(--green)';
         statusLabel = 'Unlocked';
         statusClass = 'unlocked';
-        statusIcon = '&#128275;';
       } else {
         barColor = progress < 33 ? 'var(--orange)' : progress < 67 ? 'var(--gold)' : 'var(--green)';
         statusLabel = `${remaining} days remaining`;
         statusClass = 'locked';
-        statusIcon = '&#128274;';
       }
 
       return `<div class="reserve-card animate-in">
         <div class="reserve-card-top">
-          <div class="reserve-card-name"><span class="lock-icon">${statusIcon}</span>${this.esc(d.businessName)}</div>
+          <div class="reserve-card-name">${this.esc(d.businessName)}</div>
           <div><span class="badge badge-${d.leadType}">${d.leadType.toUpperCase()}</span></div>
         </div>
         <div class="reserve-card-meta">Activated ${this.formatDateShort(d.activatedDate)} &middot; ${(d.stores || 1) > 1 ? (d.stores || 1) + ' stores &middot; ' : ''}${this.commCalcLabel(d)} = <strong>${this.eur(commission)}</strong></div>
@@ -1039,7 +1026,7 @@ const App = {
           <span class="reserve-days">Day ${Math.min(elapsed, 90)} of 90</span>
         </div>
         <div class="bar-track"><div class="bar-fill" style="width:${progress}%;background:${barColor}"></div></div>
-        <div class="reserve-status-label ${statusClass}">${statusIcon} ${statusLabel}</div>
+        <div class="reserve-status-label ${statusClass}">${statusLabel}</div>
       </div>`;
     }).join('');
   },
@@ -1059,9 +1046,7 @@ const App = {
     ];
     document.getElementById('tableHead').innerHTML = '<tr>' + cols.map(c => {
       if (c.key === '_actions') return '<th></th>';
-      const sorted = this.tableSort.col === c.key;
-      const arrow = sorted ? (this.tableSort.asc ? '&#9650;' : '&#9660;') : '&#9650;';
-      return `<th class="${sorted ? 'sorted' : ''}" data-action="sort" data-col="${c.key}">${c.label} <span class="sort-arrow">${arrow}</span></th>`;
+      return `<th data-action="sort" data-col="${c.key}">${c.label}</th>`;
     }).join('') + '</tr>';
 
     // Filter
@@ -1094,7 +1079,7 @@ const App = {
 
     if (items.length === 0) {
       document.getElementById('tableBody').innerHTML = '';
-      document.getElementById('tableEmpty').innerHTML = `<div class="empty-state"><div class="icon">&#9744;</div><p>No deals found</p></div>`;
+      document.getElementById('tableEmpty').innerHTML = `<div class="empty-state"><p>No deals found</p></div>`;
       return;
     }
     document.getElementById('tableEmpty').innerHTML = '';
