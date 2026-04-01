@@ -815,7 +815,21 @@ tr:hover td { background: var(--bg-s); }
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <script>
+// --- Firebase ---
+firebase.initializeApp({
+  apiKey: "AIzaSyCoYwfVufoupE4qk90F6kzn714XBwr26zA",
+  authDomain: "tracker-5ab5c.firebaseapp.com",
+  databaseURL: "https://tracker-5ab5c-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tracker-5ab5c",
+  storageBucket: "tracker-5ab5c.firebasestorage.app",
+  messagingSenderId: "180988978866",
+  appId: "1:180988978866:web:ce0a29d46451a4d2030bab"
+});
+const db = firebase.database();
+
 const App = {
   deals: [],
   viewMonth: new Date(),
@@ -831,21 +845,19 @@ const App = {
 
   MONTHS: ['January','February','March','April','May','June','July','August','September','October','November','December'],
 
-  // ===========================================
-  // DEALS DATA — Edit this array, commit & push
-  // ===========================================
-  DEALS_DATA: [],
-
   // --- Init ---
   init() {
-    this.deals = JSON.parse(JSON.stringify(this.DEALS_DATA));
     this.viewMonth = new Date();
     document.getElementById('fDate').value = this.isoDate(new Date());
     this.bindEvents();
-    this.render();
+    // Listen for real-time updates from Firebase
+    db.ref('deals').on('value', snap => {
+      this.deals = snap.val() || [];
+      this.render();
+    });
   },
 
-  save() { /* data lives in DEALS_DATA above — use Export JSON to update */ },
+  save() { db.ref('deals').set(this.deals); },
 
   // --- Deal CRUD ---
   addDeal(d) {
