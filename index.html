@@ -848,22 +848,27 @@ const App = {
   // --- Data ---
   async loadData() {
     try {
-      const res = await fetch(this.BLOB_URL, { headers: { 'Content-Type': 'application/json' } });
-      if (res.ok) this.deals = await res.json();
-      else this.deals = [];
-    } catch { this.deals = []; }
+      const res = await fetch(this.BLOB_URL, {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        this.deals = await res.json();
+        if (!Array.isArray(this.deals)) this.deals = [];
+      } else {
+        console.error('Load failed:', res.status);
+        this.deals = [];
+      }
+    } catch (e) { console.error('Load error:', e); this.deals = []; }
   },
   async save() {
-    if (this.saving) return;
-    this.saving = true;
     try {
-      await fetch(this.BLOB_URL, {
+      const res = await fetch(this.BLOB_URL, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(this.deals)
       });
-    } catch (e) { console.error('Save failed:', e); }
-    this.saving = false;
+      if (!res.ok) console.error('Save failed:', res.status);
+    } catch (e) { console.error('Save error:', e); }
   },
 
   // --- Deal CRUD ---
