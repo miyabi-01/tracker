@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VEXiON cards — Compensation Tracker</title>
+<style>
+:root {
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+  --bg: #ffffff;
+  --bg-s: #f5f5f7;
+  --bg-t: #e8e8ed;
+  --text: #1d1d1f;
+  --text-s: #6e6e73;
+  --text-t: #86868b;
+  --brand: #36C6FA;
+  --accent: #0071e3;
+  --accent-h: #0077ed;
+  --green: #34c759;
+  --orange: #ff9f0a;
+  --red: #ff3b30;
+  --gold: #e8a317;
+  --purple: #af52de;
+  --border: #d2d2d7;
+  --radius: 12px;
+  --radius-s: 8px;
+  --shadow: none;
+  --shadow-l: none;
+  --tr: 0.2s ease;
+  --max-w: 1080px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg-s);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: var(--max-w); margin: 0 auto; padding: 24px 20px 60px; }
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 0 24px;
+}
+.header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.header h1 .brand-accent { color: var(--brand); }
+.header-right {
+  font-size: 15px;
+  color: var(--text-s);
+  font-weight: 500;
+}
+
+/* Section */
+.section { margin-bottom: 32px; }
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+/* Cards grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.stat-card .label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-s);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.stat-card .value {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.stat-card .sub {
+  font-size: 13px;
+  color: var(--text-t);
+  margin-top: 4px;
+}
+.stat-card .value.green { color: var(--green); }
+
+/* Month nav */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.month-nav .month-label {
+  font-size: 17px;
+  font-weight: 600;
+  min-width: 180px;
+  text-align: center;
+}
+.nav-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 980px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--text-s);
+  transition: var(--tr);
+}
+.nav-btn:hover { background: var(--bg-s); color: var(--text); }
+
+/* Detail toggle */
+.detail-toggle {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.detail-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 24px;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-s);
+  cursor: pointer;
+  transition: var(--tr);
+}
+.detail-toggle-btn:hover { color: var(--text); }
+.detail-toggle-btn .arrow { transition: transform 0.2s ease; }
+.detail-toggle-btn.open .arrow { transform: rotate(180deg); }
+.detail-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.detail-body.open { max-height: 300px; }
+.detail-body-inner {
+  padding: 0 24px 20px;
+}
+.calc-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--text-s);
+}
+.calc-row.total {
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+  padding-top: 12px;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 15px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 980px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: var(--tr);
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-h); }
+.btn-ghost { background: none; color: var(--text-s); }
+.btn-ghost:hover { color: var(--text); background: var(--bg-s); }
+.btn-danger { background: none; color: var(--red); }
+.btn-danger:hover { background: #fff0f0; }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+
+/* Form */
+.form-card {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.form-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.form-body.open { max-height: 700px; }
+.form-inner { padding: 24px; }
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.form-row.full { grid-template-columns: 1fr; }
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-s);
+  margin-bottom: 6px;
+}
+.form-group input[type="number"],
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--bg);
+  transition: var(--tr);
+  outline: none;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
+}
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 8px;
+}
+
+/* Segmented control */
+.seg-control {
+  display: inline-flex;
+  background: var(--bg-s);
+  border-radius: var(--radius-s);
+  padding: 3px;
+  gap: 2px;
+}
+.seg-control label {
+  display: block;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-s);
+  cursor: pointer;
+  transition: var(--tr);
+  text-align: center;
+}
+.seg-control input { display: none; }
+.seg-control input:checked + label {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 980px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.badge-warm { background: #e3f2fd; color: #1565c0; }
+.badge-cold { background: #f3e5f5; color: #7b1fa2; }
+.badge-monthly { background: var(--bg-s); color: var(--text-s); }
+.badge-annual { background: #e8f5e9; color: #2e7d32; }
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.status-dot.active { background: var(--green); }
+.status-dot.churned { background: var(--red); }
+
+/* Reserve cards */
+.reserve-list { display: flex; flex-direction: column; gap: 12px; }
+.reserve-card {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+}
+.reserve-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+.reserve-card-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+.reserve-card-meta {
+  font-size: 13px;
+  color: var(--text-t);
+  margin-bottom: 12px;
+}
+.reserve-card-mid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.reserve-amount { font-weight: 600; }
+.reserve-days { color: var(--text-s); font-size: 13px; }
+.bar-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-t);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease, background 0.4s ease;
+}
+.reserve-status-label {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+  text-align: right;
+}
+.reserve-status-label.locked { color: var(--orange); }
+.reserve-status-label.unlocked { color: var(--green); }
+.reserve-status-label.forfeited { color: var(--red); }
+
+/* Filter pills */
+.filter-pills {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filter-pill {
+  padding: 6px 16px;
+  border-radius: 980px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-s);
+  cursor: pointer;
+  transition: var(--tr);
+}
+.filter-pill:hover { border-color: var(--text-t); }
+.filter-pill.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+/* Table */
+.table-wrap {
+  background: var(--bg);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+.table-toolbar {
+  display: flex;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--bg-s);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.search-input {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 980px;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  width: 220px;
+  transition: var(--tr);
+}
+.search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.12); }
+.filter-select {
+  padding: 8px 32px 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 980px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  background: var(--bg);
+  color: var(--text-s);
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2386868b'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-t);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--bg-s);
+  white-space: nowrap;
+}
+th:hover { color: var(--text-s); }
+th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.4; }
+th.sorted .sort-arrow { opacity: 1; }
+td {
+  padding: 14px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--bg-s);
+}
+.table-scroll { overflow-x: auto; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg-s); }
+.td-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-t);
+}
+.empty-state .icon { display: none; }
+.empty-state p { font-size: 15px; }
+
+/* Footer */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+}
+.footer-note {
+  font-size: 13px;
+  color: var(--text-t);
+}
+.footer-actions { display: flex; gap: 8px; }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-l);
+  padding: 28px;
+  max-width: 400px;
+  width: 90%;
+}
+.modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 12px; }
+.modal p { font-size: 14px; color: var(--text-s); margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .form-row { grid-template-columns: 1fr; }
+  .header { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .table-toolbar { flex-direction: column; }
+  .search-input { width: 100%; }
+  td, th { padding: 10px 12px; font-size: 13px; }
+  .stat-card .value { font-size: 26px; }
+  .footer { flex-direction: column; align-items: flex-start; }
+  .table-scroll { overflow-x: auto; }
+}
+
+/* Reserve summary */
+.reserve-summary {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  box-shadow: var(--shadow);
+  text-align: right;
+  min-width: 180px;
+}
+.reserve-summary .rs-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-t);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.reserve-summary .rs-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: -0.02em;
+}
+.reserve-summary .rs-sub {
+  font-size: 12px;
+  color: var(--text-t);
+  margin-top: 2px;
+}
+.lock-icon {
+  font-size: 14px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fadeIn 0.3s ease; }
+
+/* Password Gate */
+#loginGate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg-s);
+}
+.login-box {
+  background: var(--bg);
+  border-radius: 16px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+.login-box h1 {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.login-box .brand-accent { color: var(--brand); }
+.login-box .login-sub {
+  font-size: 14px;
+  color: var(--text-t);
+  margin-bottom: 32px;
+}
+.login-box input[type="password"] {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  text-align: center;
+  transition: var(--tr);
+  margin-bottom: 16px;
+}
+.login-box input[type="password"]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,113,227,0.12);
+}
+.login-box .login-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 980px;
+  background: var(--text);
+  color: var(--bg);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: var(--tr);
+}
+.login-box .login-btn:hover { opacity: 0.85; }
+.login-error {
+  color: var(--red);
+  font-size: 13px;
+  margin-bottom: 12px;
+  min-height: 20px;
+}
+</style>
+</head>
+<body>
+
+<!-- Password Gate -->
+<div id="loginGate">
+  <div class="login-box animate-in">
+    <h1>VEX<span class="brand-accent">i</span>ON <span class="brand-accent">cards</span></h1>
+    <div class="login-sub">Compensation Tracker</div>
+    <form id="loginForm">
+      <input type="password" id="loginPass" placeholder="Password" autofocus>
+      <div class="login-error" id="loginError"></div>
+      <button type="submit" class="login-btn">Enter</button>
+    </form>
+  </div>
+</div>
+
+<div class="container" id="app" style="display:none">
+  <!-- Header -->
+  <div class="header">
+    <h1>VEX<span class="brand-accent">i</span>ON <span class="brand-accent">cards</span></h1>
+    <div class="header-right" id="headerDate"></div>
+  </div>
+
+  <!-- Month Nav -->
+  <div class="month-nav">
+    <button class="nav-btn" data-action="prevMonth">&lsaquo;</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button class="nav-btn" data-action="nextMonth">&rsaquo;</button>
+  </div>
+
+  <!-- Summary Dashboard -->
+  <div class="section">
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="detail-toggle">
+      <button class="detail-toggle-btn" data-action="toggleDetail">
+        <span>Calculation Detail</span>
+        <span class="arrow">&#9662;</span>
+      </button>
+      <div class="detail-body" id="detailBody">
+        <div class="detail-body-inner" id="detailContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Deal -->
+  <div class="section">
+    <div class="form-card">
+      <div style="padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+        <span class="section-title" style="margin:0">Deals</span>
+        <button class="btn btn-primary btn-sm" data-action="toggleForm">+ Add Deal</button>
+      </div>
+      <div class="form-body" id="formBody">
+        <div class="form-inner">
+          <form id="dealForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Business Name</label>
+                <input type="text" id="fName" required placeholder="e.g. Cafe Roma">
+              </div>
+              <div class="form-group">
+                <label>Activation Date</label>
+                <input type="date" id="fDate">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Number of Stores</label>
+                <input type="number" id="fStores" min="1" value="1" placeholder="1">
+              </div>
+              <div class="form-group"></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Lead Type</label>
+                <div class="seg-control">
+                  <input type="radio" name="leadType" value="warm" id="ltWarm" checked>
+                  <label for="ltWarm">Warm</label>
+                  <input type="radio" name="leadType" value="cold" id="ltCold">
+                  <label for="ltCold">Cold</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Plan Type</label>
+                <div class="seg-control">
+                  <input type="radio" name="planType" value="monthly" id="ptMonth" checked>
+                  <label for="ptMonth">Monthly</label>
+                  <input type="radio" name="planType" value="annual" id="ptAnnual">
+                  <label for="ptAnnual">Annual</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-row full">
+              <div class="form-group">
+                <label>Notes (optional)</label>
+                <textarea id="fNotes" rows="2" placeholder="Any additional details..."></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-ghost" data-action="toggleForm">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Deal</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reserve Fund -->
+  <div class="section">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+      <div>
+        <div class="section-title" style="margin-bottom:12px">Reserve Fund</div>
+        <div class="filter-pills" id="reserveFilters" style="margin-bottom:0"></div>
+      </div>
+      <div id="reserveSummary"></div>
+    </div>
+    <div class="reserve-list" id="reserveList"></div>
+  </div>
+
+  <!-- Deals Table -->
+  <div class="section">
+    <div class="section-title">All Deals</div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by name...">
+        <select class="filter-select" id="filterLead">
+          <option value="all">All Leads</option>
+          <option value="warm">Warm</option>
+          <option value="cold">Cold</option>
+        </select>
+        <select class="filter-select" id="filterPlan">
+          <option value="all">All Plans</option>
+          <option value="monthly">Monthly</option>
+          <option value="annual">Annual</option>
+        </select>
+        <select class="filter-select" id="filterStatus">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="churned">Churned</option>
+        </select>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div id="tableEmpty"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-note">Data stored locally in your browser</div>
+    <div class="footer-actions">
+      <button class="btn btn-ghost btn-sm" data-action="exportData">Export JSON</button>
+      <button class="btn btn-ghost btn-sm" data-action="importData">Import JSON</button>
+      <button class="btn btn-danger btn-sm" data-action="clearData">Clear All</button>
+    </div>
+  </div>
+  <input type="file" id="importFile" accept=".json" style="display:none">
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal animate-in">
+    <h3 id="modalTitle"></h3>
+    <p id="modalMsg"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" data-action="modalCancel">Cancel</button>
+      <button class="btn btn-danger" id="modalConfirm" data-action="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const App = {
+  deals: [],
+  viewMonth: new Date(),
+  reserveFilter: 'all',
+  tableSort: { col: 'activatedDate', asc: false },
+  modalCallback: null,
+
+  COMM: { warm: { monthly: 30, annual: 50 }, cold: { monthly: 40, annual: 60 } },
+  RESERVE_RATE: 0.20,
+  RESERVE_DAYS: 90,
+  BASE_DEFAULT: 1200,
+  BASE_OVERRIDES: { 2: 800 }, // month index 2 = March
+
+  MONTHS: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+
+  // --- Init ---
+  init() {
+    this.loadData();
+    this.viewMonth = new Date();
+    document.getElementById('fDate').value = this.isoDate(new Date());
+    this.bindEvents();
+    this.render();
+  },
+
+  // --- Data ---
+  loadData() {
+    try {
+      this.deals = JSON.parse(localStorage.getItem('vexion_deals') || '[]');
+    } catch { this.deals = []; }
+  },
+  save() {
+    localStorage.setItem('vexion_deals', JSON.stringify(this.deals));
+  },
+
+  // --- Deal CRUD ---
+  addDeal(d) {
+    this.deals.push({
+      id: crypto.randomUUID(),
+      businessName: d.businessName.trim(),
+      leadType: d.leadType,
+      planType: d.planType,
+      stores: d.stores || 1,
+      activatedDate: d.activatedDate,
+      status: 'active',
+      churnedDate: null,
+      notes: d.notes.trim()
+    });
+    this.save();
+    this.render();
+  },
+  markChurned(id) {
+    const d = this.deals.find(x => x.id === id);
+    if (d) { d.status = 'churned'; d.churnedDate = this.isoDate(new Date()); this.save(); this.render(); }
+  },
+  deleteDeal(id) {
+    this.deals = this.deals.filter(x => x.id !== id);
+    this.save();
+    this.render();
+  },
+
+  // --- Calculations ---
+  comm(d) { return this.COMM[d.leadType][d.planType] * (d.stores || 1); },
+  reserveAmt(d) { return d.planType === 'annual' ? 0 : this.comm(d) * this.RESERVE_RATE; },
+  daysElapsed(d) {
+    const end = d.status === 'churned' && d.churnedDate ? new Date(d.churnedDate + 'T00:00:00') : new Date();
+    return Math.max(0, Math.floor((end - new Date(d.activatedDate + 'T00:00:00')) / 86400000));
+  },
+  daysRemaining(d) { return Math.max(0, this.RESERVE_DAYS - this.daysFromActivation(d)); },
+  daysFromActivation(d) {
+    return Math.max(0, Math.floor((new Date() - new Date(d.activatedDate + 'T00:00:00')) / 86400000));
+  },
+  reserveStatus(d) {
+    if (d.planType === 'annual') return 'none';
+    const elapsed = this.daysFromActivation(d);
+    if (d.status === 'churned') {
+      const churnDays = Math.floor((new Date(d.churnedDate + 'T00:00:00') - new Date(d.activatedDate + 'T00:00:00')) / 86400000);
+      return churnDays >= this.RESERVE_DAYS ? 'unlocked' : 'forfeited';
+    }
+    return elapsed >= this.RESERVE_DAYS ? 'unlocked' : 'locked';
+  },
+
+  getBase(m) {
+    return this.BASE_OVERRIDES.hasOwnProperty(m) ? this.BASE_OVERRIDES[m] : this.BASE_DEFAULT;
+  },
+
+  monthPayout(y, m) {
+    const base = this.getBase(m);
+    let grossComm = 0, lockedRes = 0, unlockedRes = 0;
+    let warmCount = 0, coldCount = 0;
+    const commDeals = [];
+
+    this.deals.forEach(d => {
+      const ad = new Date(d.activatedDate + 'T00:00:00');
+      // Commissions for deals activated in this month
+      if (ad.getFullYear() === y && ad.getMonth() === m) {
+        grossComm += this.comm(d);
+        if (d.planType === 'monthly') lockedRes += this.reserveAmt(d);
+        if (d.leadType === 'warm') warmCount++; else coldCount++;
+        commDeals.push(d);
+      }
+      // Reserves maturing in this month (monthly deals only)
+      if (d.planType === 'monthly') {
+        const matureDate = new Date(ad);
+        matureDate.setDate(matureDate.getDate() + this.RESERVE_DAYS);
+        if (matureDate.getFullYear() === y && matureDate.getMonth() === m) {
+          const rs = this.reserveStatus(d);
+          if (rs === 'unlocked') unlockedRes += this.reserveAmt(d);
+        }
+      }
+    });
+
+    return { base, grossComm, lockedRes, unlockedRes, total: base + grossComm - lockedRes + unlockedRes, warmCount, coldCount, commDeals };
+  },
+
+  // --- Render ---
+  render() {
+    this.renderHeader();
+    this.renderSummary();
+    this.renderReserve();
+    this.renderTable();
+  },
+
+  renderHeader() {
+    const now = new Date();
+    document.getElementById('headerDate').textContent = this.formatDateFull(now);
+    const vm = this.viewMonth;
+    document.getElementById('monthLabel').textContent = this.MONTHS[vm.getMonth()] + ' ' + vm.getFullYear();
+  },
+
+  renderSummary() {
+    const p = this.monthPayout(this.viewMonth.getFullYear(), this.viewMonth.getMonth());
+    const commBreakdown = p.commDeals.map(d => {
+      const stores = d.stores || 1;
+      const rate = this.COMM[d.leadType][d.planType];
+      return stores > 1 ? `${stores}&times;${this.eur(rate)}` : this.eur(rate);
+    });
+    const commCalcStr = commBreakdown.length ? commBreakdown.join(' + ') : '—';
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card animate-in">
+        <div class="label">Base Salary</div>
+        <div class="value">${this.eur(p.base)}</div>
+        <div class="sub">Paid on 6th of month</div>
+      </div>
+      <div class="stat-card animate-in">
+        <div class="label">Commissions</div>
+        <div class="value">${this.eur(p.grossComm)}</div>
+        <div class="sub">${p.warmCount} warm &middot; ${p.coldCount} cold</div>
+      </div>
+      <div class="stat-card animate-in">
+        <div class="label">Invoice Amount</div>
+        <div class="value green">${this.eur(p.total)}</div>
+        <div class="sub">Net after reserves</div>
+      </div>
+    `;
+    document.getElementById('detailContent').innerHTML = `
+      <div class="calc-row"><span>Base Salary</span><span>${this.eur(p.base)}</span></div>
+      <div class="calc-row"><span>+ Gross Commissions</span><span>${this.eur(p.grossComm)}</span></div>
+      <div class="calc-row"><span>- Locked Reserves (new)</span><span>-${this.eur(p.lockedRes)}</span></div>
+      <div class="calc-row"><span>+ Unlocked Reserves (matured)</span><span>+${this.eur(p.unlockedRes)}</span></div>
+      <div class="calc-row total"><span>Invoice Amount</span><span>${this.eur(p.total)}</span></div>
+    `;
+  },
+
+  commCalcLabel(d) {
+    const stores = d.stores || 1;
+    const rate = this.COMM[d.leadType][d.planType];
+    return stores > 1 ? `${stores} &times; ${this.eur(rate)}` : this.eur(rate);
+  },
+
+  renderReserve() {
+    // Filter pills
+    const filters = ['all','locked','unlocked','forfeited'];
+    document.getElementById('reserveFilters').innerHTML = filters.map(f => {
+      const icons = { locked: '&#128274;', unlocked: '&#128275;', forfeited: '&#128683;' };
+      const icon = icons[f] ? `<span style="font-size:12px;margin-right:4px">${icons[f]}</span>` : '';
+      return `<button class="filter-pill ${this.reserveFilter === f ? 'active' : ''}" data-action="reserveFilter" data-val="${f}">${icon}${f.charAt(0).toUpperCase() + f.slice(1)}</button>`;
+    }).join('');
+
+    // Summary
+    const allMonthly = this.deals.filter(d => d.planType === 'monthly');
+    const totalLocked = allMonthly.filter(d => this.reserveStatus(d) === 'locked').reduce((s, d) => s + this.reserveAmt(d), 0);
+    const lockedCount = allMonthly.filter(d => this.reserveStatus(d) === 'locked').length;
+    const totalCount = allMonthly.length;
+    document.getElementById('reserveSummary').innerHTML = `
+      <div class="reserve-summary">
+        <div class="rs-label">Total Locked</div>
+        <div class="rs-value">${this.eur(totalLocked)}</div>
+        <div class="rs-sub">${lockedCount} of ${totalCount} deals</div>
+      </div>`;
+
+    // Cards
+    let items = allMonthly.slice();
+    if (this.reserveFilter !== 'all') items = items.filter(d => this.reserveStatus(d) === this.reserveFilter);
+    items.sort((a, b) => this.daysRemaining(a) - this.daysRemaining(b));
+
+    if (items.length === 0) {
+      document.getElementById('reserveList').innerHTML = `<div class="empty-state"><div class="icon">&#9681;</div><p>No reserve fund entries${this.reserveFilter !== 'all' ? ' for this filter' : ''}</p></div>`;
+      return;
+    }
+
+    document.getElementById('reserveList').innerHTML = items.map(d => {
+      const commission = this.comm(d);
+      const reserve = this.reserveAmt(d);
+      const elapsed = this.daysFromActivation(d);
+      const remaining = this.daysRemaining(d);
+      const status = this.reserveStatus(d);
+      const progress = Math.min(100, (elapsed / this.RESERVE_DAYS) * 100);
+
+      let barColor, statusLabel, statusClass, statusIcon;
+      if (status === 'forfeited') {
+        barColor = 'var(--red)';
+        statusLabel = 'Forfeited';
+        statusClass = 'forfeited';
+        statusIcon = '&#128683;';
+      } else if (status === 'unlocked') {
+        barColor = 'var(--green)';
+        statusLabel = 'Unlocked';
+        statusClass = 'unlocked';
+        statusIcon = '&#128275;';
+      } else {
+        barColor = progress < 33 ? 'var(--orange)' : progress < 67 ? 'var(--gold)' : 'var(--green)';
+        statusLabel = `${remaining} days remaining`;
+        statusClass = 'locked';
+        statusIcon = '&#128274;';
+      }
+
+      return `<div class="reserve-card animate-in">
+        <div class="reserve-card-top">
+          <div class="reserve-card-name"><span class="lock-icon">${statusIcon}</span>${this.esc(d.businessName)}</div>
+          <div><span class="badge badge-${d.leadType}">${d.leadType.toUpperCase()}</span></div>
+        </div>
+        <div class="reserve-card-meta">Activated ${this.formatDateShort(d.activatedDate)} &middot; ${(d.stores || 1) > 1 ? (d.stores || 1) + ' stores &middot; ' : ''}${this.commCalcLabel(d)} = <strong>${this.eur(commission)}</strong></div>
+        <div class="reserve-card-mid">
+          <span class="reserve-amount">Reserve: ${this.eur(reserve)}</span>
+          <span class="reserve-days">Day ${Math.min(elapsed, 90)} of 90</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${progress}%;background:${barColor}"></div></div>
+        <div class="reserve-status-label ${statusClass}">${statusIcon} ${statusLabel}</div>
+      </div>`;
+    }).join('');
+  },
+
+  renderTable() {
+    // Head
+    const cols = [
+      { key: 'businessName', label: 'Business' },
+      { key: 'leadType', label: 'Lead' },
+      { key: 'planType', label: 'Plan' },
+      { key: 'stores', label: 'Stores' },
+      { key: 'activatedDate', label: 'Date' },
+      { key: 'status', label: 'Status' },
+      { key: '_comm', label: 'Commission' },
+      { key: '_reserve', label: 'Reserve' },
+      { key: '_actions', label: '' }
+    ];
+    document.getElementById('tableHead').innerHTML = '<tr>' + cols.map(c => {
+      if (c.key === '_actions') return '<th></th>';
+      const sorted = this.tableSort.col === c.key;
+      const arrow = sorted ? (this.tableSort.asc ? '&#9650;' : '&#9660;') : '&#9650;';
+      return `<th class="${sorted ? 'sorted' : ''}" data-action="sort" data-col="${c.key}">${c.label} <span class="sort-arrow">${arrow}</span></th>`;
+    }).join('') + '</tr>';
+
+    // Filter
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const fLead = document.getElementById('filterLead').value;
+    const fPlan = document.getElementById('filterPlan').value;
+    const fStatus = document.getElementById('filterStatus').value;
+
+    let items = this.deals.filter(d => {
+      if (search && !d.businessName.toLowerCase().includes(search)) return false;
+      if (fLead !== 'all' && d.leadType !== fLead) return false;
+      if (fPlan !== 'all' && d.planType !== fPlan) return false;
+      if (fStatus !== 'all' && d.status !== fStatus) return false;
+      return true;
+    });
+
+    // Sort
+    const sc = this.tableSort.col;
+    items.sort((a, b) => {
+      let va, vb;
+      if (sc === '_comm') { va = this.comm(a); vb = this.comm(b); }
+      else if (sc === '_reserve') { va = this.reserveAmt(a); vb = this.reserveAmt(b); }
+      else if (sc === 'stores') { va = a.stores || 1; vb = b.stores || 1; }
+      else { va = a[sc] || ''; vb = b[sc] || ''; }
+      if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+      if (va < vb) return this.tableSort.asc ? -1 : 1;
+      if (va > vb) return this.tableSort.asc ? 1 : -1;
+      return 0;
+    });
+
+    if (items.length === 0) {
+      document.getElementById('tableBody').innerHTML = '';
+      document.getElementById('tableEmpty').innerHTML = `<div class="empty-state"><div class="icon">&#9744;</div><p>No deals found</p></div>`;
+      return;
+    }
+    document.getElementById('tableEmpty').innerHTML = '';
+    document.getElementById('tableBody').innerHTML = items.map(d => `<tr>
+      <td><strong>${this.esc(d.businessName)}</strong></td>
+      <td><span class="badge badge-${d.leadType}">${d.leadType.toUpperCase()}</span></td>
+      <td><span class="badge badge-${d.planType}">${d.planType.charAt(0).toUpperCase() + d.planType.slice(1)}</span></td>
+      <td style="text-align:center">${d.stores || 1}</td>
+      <td>${this.formatDateShort(d.activatedDate)}</td>
+      <td><span class="status-dot ${d.status}"></span>${d.status.charAt(0).toUpperCase() + d.status.slice(1)}</td>
+      <td>${this.eur(this.comm(d))} <span style="color:var(--text-t);font-size:12px">(${this.commCalcLabel(d)})</span></td>
+      <td>${d.planType === 'annual' ? '—' : this.eur(this.reserveAmt(d))}</td>
+      <td style="white-space:nowrap"><div class="td-actions">
+        ${d.status === 'active' ? `<button class="btn btn-ghost btn-sm" data-action="churn" data-id="${d.id}">Churned</button>` : `<button class="btn btn-danger btn-sm" data-action="delete" data-id="${d.id}">Delete</button>`}
+      </div></td>
+    </tr>`).join('');
+  },
+
+  // --- Events ---
+  bindEvents() {
+    const self = this;
+
+    // Delegated clicks
+    document.getElementById('app').addEventListener('click', e => {
+      const t = e.target.closest('[data-action]');
+      if (!t) return;
+      const action = t.dataset.action;
+
+      if (action === 'prevMonth') {
+        self.viewMonth.setMonth(self.viewMonth.getMonth() - 1);
+        self.render();
+      } else if (action === 'nextMonth') {
+        self.viewMonth.setMonth(self.viewMonth.getMonth() + 1);
+        self.render();
+      } else if (action === 'toggleDetail') {
+        t.classList.toggle('open');
+        document.getElementById('detailBody').classList.toggle('open');
+      } else if (action === 'toggleForm') {
+        document.getElementById('formBody').classList.toggle('open');
+      } else if (action === 'reserveFilter') {
+        self.reserveFilter = t.dataset.val;
+        self.renderReserve();
+      } else if (action === 'sort') {
+        const col = t.dataset.col;
+        if (self.tableSort.col === col) self.tableSort.asc = !self.tableSort.asc;
+        else { self.tableSort.col = col; self.tableSort.asc = true; }
+        self.renderTable();
+      } else if (action === 'churn') {
+        self.confirm('Mark as Churned', 'This client will be marked as churned. Reserve fund for monthly deals will be forfeited if under 90 days.', () => self.markChurned(t.dataset.id));
+      } else if (action === 'delete') {
+        self.confirm('Delete Deal', 'This deal will be permanently deleted. This cannot be undone.', () => self.deleteDeal(t.dataset.id));
+      } else if (action === 'exportData') {
+        self.exportJSON();
+      } else if (action === 'importData') {
+        document.getElementById('importFile').click();
+      } else if (action === 'clearData') {
+        self.confirm('Clear All Data', 'All deals will be permanently deleted. Export your data first if you want a backup.', () => {
+          self.deals = [];
+          self.save();
+          self.render();
+        });
+      }
+    });
+
+    // Modal
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+      const t = e.target.closest('[data-action]');
+      if (!t) { if (e.target === document.getElementById('modalOverlay')) self.closeModal(); return; }
+      if (t.dataset.action === 'modalCancel') self.closeModal();
+      if (t.dataset.action === 'modalConfirm') { if (self.modalCallback) self.modalCallback(); self.closeModal(); }
+    });
+
+    // Form
+    document.getElementById('dealForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('fName').value;
+      if (!name.trim()) return;
+      self.addDeal({
+        businessName: name,
+        leadType: document.querySelector('input[name="leadType"]:checked').value,
+        planType: document.querySelector('input[name="planType"]:checked').value,
+        stores: parseInt(document.getElementById('fStores').value) || 1,
+        activatedDate: document.getElementById('fDate').value || self.isoDate(new Date()),
+        notes: document.getElementById('fNotes').value
+      });
+      document.getElementById('dealForm').reset();
+      document.getElementById('fDate').value = self.isoDate(new Date());
+      document.getElementById('fStores').value = '1';
+      document.getElementById('ltWarm').checked = true;
+      document.getElementById('ptMonth').checked = true;
+      document.getElementById('formBody').classList.remove('open');
+    });
+
+    // Table filters
+    ['searchInput','filterLead','filterPlan','filterStatus'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => self.renderTable());
+      document.getElementById(id).addEventListener('change', () => self.renderTable());
+    });
+
+    // Import file
+    document.getElementById('importFile').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (Array.isArray(data)) { self.deals = data; self.save(); self.render(); }
+          else throw new Error();
+        } catch { self.confirm('Import Error', 'The file could not be parsed. Please use a valid JSON export file.', () => {}); }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+  },
+
+  // --- Modal ---
+  confirm(title, msg, cb) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalMsg').textContent = msg;
+    this.modalCallback = cb;
+    document.getElementById('modalOverlay').classList.add('open');
+  },
+  closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    this.modalCallback = null;
+  },
+
+  // --- Export ---
+  exportJSON() {
+    const blob = new Blob([JSON.stringify(this.deals, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `vexion-deals-${this.isoDate(new Date())}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  },
+
+  // --- Helpers ---
+  eur(n) { return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n); },
+  isoDate(d) { return d.toISOString().slice(0, 10); },
+  formatDateShort(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  },
+  formatDateFull(d) {
+    return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  },
+  esc(s) { const el = document.createElement('span'); el.textContent = s; return el.innerHTML; },
+
+  // --- Demo Data ---
+  loadSampleData() {
+    const today = new Date();
+    const ago = (days) => { const d = new Date(today); d.setDate(d.getDate() - days); return this.isoDate(d); };
+    this.deals = [
+      { id: crypto.randomUUID(), businessName: 'Cafe Roma', leadType: 'warm', planType: 'monthly', stores: 1, activatedDate: ago(15), status: 'active', churnedDate: null, notes: '' },
+      { id: crypto.randomUUID(), businessName: 'Pizza Express', leadType: 'cold', planType: 'monthly', stores: 3, activatedDate: ago(45), status: 'active', churnedDate: null, notes: '' },
+      { id: crypto.randomUUID(), businessName: 'Hotel Bratislava', leadType: 'warm', planType: 'annual', stores: 2, activatedDate: ago(30), status: 'active', churnedDate: null, notes: 'Large hotel chain' },
+      { id: crypto.randomUUID(), businessName: 'Bistro Centrum', leadType: 'cold', planType: 'monthly', stores: 1, activatedDate: ago(95), status: 'active', churnedDate: null, notes: '' },
+      { id: crypto.randomUUID(), businessName: 'Wine Bar SK', leadType: 'warm', planType: 'monthly', stores: 1, activatedDate: ago(60), status: 'churned', churnedDate: ago(20), notes: 'Lost interest' },
+      { id: crypto.randomUUID(), businessName: 'Fitness Zone', leadType: 'cold', planType: 'annual', stores: 1, activatedDate: ago(10), status: 'active', churnedDate: null, notes: '' },
+      { id: crypto.randomUUID(), businessName: 'Beauty Salon Lux', leadType: 'warm', planType: 'monthly', stores: 1, activatedDate: ago(100), status: 'active', churnedDate: null, notes: '' },
+      { id: crypto.randomUUID(), businessName: 'Auto Servis Plus', leadType: 'cold', planType: 'monthly', stores: 2, activatedDate: ago(25), status: 'churned', churnedDate: ago(5), notes: 'Budget issues' },
+    ];
+    this.save();
+    this.render();
+  }
+};
+
+// --- Password Gate ---
+const PASS_HASH = '5ccc2e8715d7a17c3110afe37b8561b84b450db8efcf187d90649f212201050f';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function unlock() {
+  document.getElementById('loginGate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  App.init();
+}
+
+if (sessionStorage.getItem('vexion_auth') === 'ok') {
+  unlock();
+} else {
+  document.getElementById('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const pass = document.getElementById('loginPass').value.trim();
+    const hash = await sha256(pass);
+    if (hash === PASS_HASH) {
+      sessionStorage.setItem('vexion_auth', 'ok');
+      unlock();
+    } else {
+      document.getElementById('loginError').textContent = 'Incorrect password';
+      document.getElementById('loginPass').value = '';
+      document.getElementById('loginPass').focus();
+    }
+  });
+}
+</script>
+</body>
+</html>
