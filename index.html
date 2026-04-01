@@ -899,8 +899,10 @@ const App = {
         const matureDate = new Date(ad);
         matureDate.setDate(matureDate.getDate() + this.RESERVE_DAYS);
         if (matureDate.getFullYear() === y && matureDate.getMonth() === m) {
-          const rs = this.reserveStatus(d);
-          if (rs === 'unlocked') unlockedRes += this.reserveAmt(d);
+          // Check if deal was still active at maturation date
+          const wasCancelled = d.status === 'churned' && d.churnedDate &&
+            new Date(d.churnedDate + 'T00:00:00') < matureDate;
+          if (!wasCancelled) unlockedRes += this.reserveAmt(d);
         }
       }
     });
