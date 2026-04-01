@@ -798,8 +798,6 @@ tr:hover td { background: var(--bg-s); }
     <div class="footer-note">Data stored locally in your browser</div>
     <div class="footer-actions">
       <button class="btn btn-ghost btn-sm" data-action="exportData">Export JSON</button>
-      <button class="btn btn-ghost btn-sm" data-action="importData">Import JSON</button>
-      <button class="btn btn-danger btn-sm" data-action="clearData">Clear All</button>
     </div>
   </div>
   <input type="file" id="importFile" accept=".json" style="display:none">
@@ -833,46 +831,24 @@ const App = {
 
   MONTHS: ['January','February','March','April','May','June','July','August','September','October','November','December'],
 
-  BLOB_URL: 'https://jsonblob.com/api/jsonBlob/019d4982-db32-7614-8adf-c96229bf6947',
-  saving: false,
+  // ===========================================
+  // DEALS DATA — Edit this array, commit & push
+  // ===========================================
+  DEALS_DATA: [],
 
   // --- Init ---
-  async init() {
+  init() {
+    this.deals = JSON.parse(JSON.stringify(this.DEALS_DATA));
     this.viewMonth = new Date();
     document.getElementById('fDate').value = this.isoDate(new Date());
     this.bindEvents();
-    await this.loadData();
     this.render();
   },
 
-  // --- Data ---
-  async loadData() {
-    try {
-      const res = await fetch(this.BLOB_URL, {
-        headers: { 'Accept': 'application/json' }
-      });
-      if (res.ok) {
-        this.deals = await res.json();
-        if (!Array.isArray(this.deals)) this.deals = [];
-      } else {
-        console.error('Load failed:', res.status);
-        this.deals = [];
-      }
-    } catch (e) { console.error('Load error:', e); this.deals = []; }
-  },
-  async save() {
-    try {
-      const res = await fetch(this.BLOB_URL, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(this.deals)
-      });
-      if (!res.ok) console.error('Save failed:', res.status);
-    } catch (e) { console.error('Save error:', e); }
-  },
+  save() { /* data lives in DEALS_DATA above — use Export JSON to update */ },
 
   // --- Deal CRUD ---
-  async addDeal(d) {
+  addDeal(d) {
     this.deals.push({
       id: crypto.randomUUID(),
       businessName: d.businessName.trim(),
@@ -885,16 +861,16 @@ const App = {
       notes: d.notes.trim()
     });
     this.render();
-    await this.save();
+    this.save();
   },
-  async markChurned(id) {
+  markChurned(id) {
     const d = this.deals.find(x => x.id === id);
-    if (d) { d.status = 'churned'; d.churnedDate = this.isoDate(new Date()); this.render(); await this.save(); }
+    if (d) { d.status = 'churned'; d.churnedDate = this.isoDate(new Date()); this.render(); this.save(); }
   },
-  async deleteDeal(id) {
+  deleteDeal(id) {
     this.deals = this.deals.filter(x => x.id !== id);
     this.render();
-    await this.save();
+    this.save();
   },
 
   // --- Calculations ---
@@ -1276,7 +1252,7 @@ const App = {
   esc(s) { const el = document.createElement('span'); el.textContent = s; return el.innerHTML; },
 
   // --- Demo Data ---
-  async loadSampleData() {
+  loadSampleData() {
     const today = new Date();
     const ago = (days) => { const d = new Date(today); d.setDate(d.getDate() - days); return this.isoDate(d); };
     this.deals = [
