@@ -833,27 +833,41 @@ const App = {
 
   MONTHS: ['January','February','March','April','May','June','July','August','September','October','November','December'],
 
+  BLOB_URL: 'https://jsonblob.com/api/jsonBlob/019d4982-db32-7614-8adf-c96229bf6947',
+  saving: false,
+
   // --- Init ---
-  init() {
-    this.loadData();
+  async init() {
     this.viewMonth = new Date();
     document.getElementById('fDate').value = this.isoDate(new Date());
     this.bindEvents();
+    await this.loadData();
     this.render();
   },
 
   // --- Data ---
-  loadData() {
+  async loadData() {
     try {
-      this.deals = JSON.parse(localStorage.getItem('vexion_deals') || '[]');
+      const res = await fetch(this.BLOB_URL, { headers: { 'Content-Type': 'application/json' } });
+      if (res.ok) this.deals = await res.json();
+      else this.deals = [];
     } catch { this.deals = []; }
   },
-  save() {
-    localStorage.setItem('vexion_deals', JSON.stringify(this.deals));
+  async save() {
+    if (this.saving) return;
+    this.saving = true;
+    try {
+      await fetch(this.BLOB_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.deals)
+      });
+    } catch (e) { console.error('Save failed:', e); }
+    this.saving = false;
   },
 
   // --- Deal CRUD ---
-  addDeal(d) {
+  async addDeal(d) {
     this.deals.push({
       id: crypto.randomUUID(),
       businessName: d.businessName.trim(),
@@ -865,17 +879,17 @@ const App = {
       churnedDate: null,
       notes: d.notes.trim()
     });
-    this.save();
     this.render();
+    await this.save();
   },
-  markChurned(id) {
+  async markChurned(id) {
     const d = this.deals.find(x => x.id === id);
-    if (d) { d.status = 'churned'; d.churnedDate = this.isoDate(new Date()); this.save(); this.render(); }
+    if (d) { d.status = 'churned'; d.churnedDate = this.isoDate(new Date()); this.render(); await this.save(); }
   },
-  deleteDeal(id) {
+  async deleteDeal(id) {
     this.deals = this.deals.filter(x => x.id !== id);
-    this.save();
     this.render();
+    await this.save();
   },
 
   // --- Calculations ---
@@ -1257,7 +1271,7 @@ const App = {
   esc(s) { const el = document.createElement('span'); el.textContent = s; return el.innerHTML; },
 
   // --- Demo Data ---
-  loadSampleData() {
+  async loadSampleData() {
     const today = new Date();
     const ago = (days) => { const d = new Date(today); d.setDate(d.getDate() - days); return this.isoDate(d); };
     this.deals = [
