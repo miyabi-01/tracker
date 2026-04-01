@@ -415,6 +415,7 @@ body {
   transition: var(--tr);
 }
 .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.12); }
+.table-filters-row { display: flex; gap: 12px; }
 .filter-select {
   padding: 8px 32px 8px 14px;
   border: 1px solid var(--border);
@@ -514,10 +515,31 @@ tr:hover td { background: var(--bg-s); }
 @media (max-width: 700px) {
   .form-row { grid-template-columns: 1fr; }
   .header { flex-direction: column; align-items: flex-start; gap: 4px; }
-  .table-toolbar { flex-direction: column; }
-  .search-input { width: 100%; }
-  td, th { padding: 10px 12px; font-size: 13px; }
+  .header-right { font-size: 13px; }
+
+  /* Month nav: arrows on edges, label centered */
+  .month-nav { justify-content: space-between; width: 100%; }
+  .month-nav .month-label { min-width: 0; flex: 1; }
+
+  /* Stats: stack vertically */
+  .stats-grid { grid-template-columns: 1fr; }
   .stat-card .value { font-size: 26px; }
+
+  /* Reserve: pills in one row, summary below */
+  .reserve-section-header { flex-direction: column !important; align-items: stretch !important; }
+  .reserve-section-header > div:first-child { width: 100%; }
+  .filter-pills { flex-wrap: nowrap; }
+  .filter-pill { flex: 1; text-align: center; padding: 6px 8px; font-size: 12px; }
+  #reserveSummary { width: 100%; }
+  #reserveSummary .reserve-summary { text-align: center; min-width: 0; width: 100%; margin-top: 12px; }
+
+  /* Table toolbar: search full width, selects in a row */
+  .table-toolbar { flex-direction: column; gap: 10px; }
+  .search-input { width: 100%; }
+  .table-filters-row { display: flex; gap: 8px; width: 100%; }
+  .table-filters-row .filter-select { flex: 1; min-width: 0; font-size: 12px; padding: 8px 10px; }
+
+  td, th { padding: 10px 12px; font-size: 13px; }
   .footer { flex-direction: column; align-items: flex-start; }
   .table-scroll { overflow-x: auto; }
 }
@@ -727,7 +749,7 @@ tr:hover td { background: var(--bg-s); }
 
   <!-- Reserve Fund -->
   <div class="section">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+    <div class="reserve-section-header" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
       <div>
         <div class="section-title" style="margin-bottom:12px">Reserve Fund</div>
         <div class="filter-pills" id="reserveFilters" style="margin-bottom:0"></div>
@@ -743,21 +765,23 @@ tr:hover td { background: var(--bg-s); }
     <div class="table-wrap">
       <div class="table-toolbar">
         <input type="text" class="search-input" id="searchInput" placeholder="Search by name...">
-        <select class="filter-select" id="filterLead">
-          <option value="all">All Leads</option>
-          <option value="warm">Warm</option>
-          <option value="cold">Cold</option>
-        </select>
-        <select class="filter-select" id="filterPlan">
-          <option value="all">All Plans</option>
-          <option value="monthly">Monthly</option>
-          <option value="annual">Annual</option>
-        </select>
-        <select class="filter-select" id="filterStatus">
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="churned">Churned</option>
-        </select>
+        <div class="table-filters-row">
+          <select class="filter-select" id="filterLead">
+            <option value="all">All Leads</option>
+            <option value="warm">Warm</option>
+            <option value="cold">Cold</option>
+          </select>
+          <select class="filter-select" id="filterPlan">
+            <option value="all">All Plans</option>
+            <option value="monthly">Monthly</option>
+            <option value="annual">Annual</option>
+          </select>
+          <select class="filter-select" id="filterStatus">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="churned">Churned</option>
+          </select>
+        </div>
       </div>
       <div class="table-scroll">
         <table>
